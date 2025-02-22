@@ -13,9 +13,8 @@ __note_fzf() {
 
 note() {
   subcommand="$1"
-  local DEFAULT_BROWSER="Google Chrome"
   case "$1" in
-    list | ls | l)
+    list | ls)
       __note_fzf -m
       ;;
     new | n)
@@ -39,23 +38,13 @@ note() {
       __note_fzf --print0 -m | xargs -I filename -0 -o rm -t -i $NOTE_DIR/filename
       ;;
     view | v)
-      if (command -v bat); then
-        __note_fzf --bind "enter:become(bat --plain --language=markdown $NOTE_DIR/{1})"
-      else
-        __note_fzf --bind "enter:become(less $NOTE_DIR/{1})"
-      fi
-      ;;
-    open | o)
-      __note_fzf --print0 -m | xargs -I filename -0 -o open -a $DEFAULT_BROWSER $NOTE_DIR/filename
+      __note_fzf --bind "enter:become(bat --plain --language=markdown $NOTE_DIR/{1})"
       ;;
     grep | rg)
-      if (command rg); then
-        rg -inH "$@" $NOTE_DIR/
-      else
-        grep -inH "$@" $NOTE_DIR/
-      fi
+      rg -inH "$@" $NOTE_DIR/
       ;;
     browse)
+      # TODO: Use local web server
       local DEFAULT_BROWSER="Google Chrome"
       local index=$(mktemp).md
       printf "# Note\n\n" >$index
@@ -87,8 +76,7 @@ __note_zsh_completions_subcommands() {
     {new,n}':New note'
     {edit,e}':Edit note'
     {remove,rm}':Remove note(s)'
-    {view,v}':View source'
-    {open,o}':Open note with browser'
+    {view,v}':View file'
     {grep,rg}':Grep notes'
     browse':(Beta) Browse notes with browser'
     zsh-completions':Print completion file for ZSH'
