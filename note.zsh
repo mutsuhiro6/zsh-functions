@@ -4,14 +4,17 @@ __note_fzf() {
   fd --follow --base-directory "$NOTE_DIR" --exclude ".git" . |
     fzf --reverse \
       --border top \
-      --height 40% \
-      --preview="bat --plain --language=markdown $NOTE_DIR/{1}" \
-      --preview-window=right:50% \
-      --inline-info \
+      --height 100% \
+      --preview="bat --terminal-width $(($(tput cols) * 35 / 50 - 10)) --wrap=character -fp -l markdown $NOTE_DIR/{1}" \
+      --preview-window=right:70% \
       "$@"
 }
 
 note() {
+  if [[ $# -lt 1 ]]; then
+    print -u "Usage: note subcommands"
+    return 1
+  fi
   subcommand="$1"
   case "$1" in
     list | ls)
@@ -19,8 +22,10 @@ note() {
       ;;
     new | n)
       local title
-      print -n "Title: "
-      read -r title
+      while [[ -z $title ]]; do
+        print -n "Title: "
+        read -r title
+      done
       local suffix=$(LC_ALL=C tr -dc a-f0-9 </dev/urandom | head -c 7).md
       local filename=$(tr '[:upper:]' '[:lower:]' <<<$(tr ' ' '_' <<<$title))
       local abs_filepath=$NOTE_DIR/${filename}_$suffix
@@ -28,14 +33,14 @@ note() {
         suffix=$(LC_ALL=C tr -dc a-f0-9 </dev/urandom | head -c 7).md
         abs_filepath=$NOTE_DIR/${filename}_$suffix
       done
-      print "# $title" >$filename
-      ${EDITOR:-vim} $filename
+      print "# $title" >$abs_filepath
+      ${EDITOR:-vim} $abs_filepath
       ;;
     edit | e)
       __note_fzf --bind "enter:become(${EDITOR:-vim} $NOTE_DIR/{1})"
       ;;
     remove | rm)
-      __note_fzf --print0 -m | xargs -I filename -0 -o rm -t -i $NOTE_DIR/filename
+      __note_fzf --print0 -m | xargs -I filename -0 -o rm -i $NOTE_DIR/filename
       ;;
     view | v)
       __note_fzf --bind "enter:become(bat --plain --language=markdown $NOTE_DIR/{1})"
@@ -58,6 +63,10 @@ note() {
     zsh-completions)
       print "#compdef note"
       print '__note_zsh_completions "$@"'
+      ;;
+    *)
+      print -u 2 "No such command: $1"
+      return 1
       ;;
   esac
 }
