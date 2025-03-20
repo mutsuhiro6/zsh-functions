@@ -12,7 +12,7 @@ __note_fzf() {
 
 note() {
   if [[ $# -lt 1 ]]; then
-    print -u "Usage: note subcommands"
+    print -u 2 "Usage: note subcommands"
     return 1
   fi
   subcommand="$1"
@@ -43,7 +43,7 @@ note() {
       __note_fzf --print0 -m | xargs -I filename -0 -o rm -i $NOTE_DIR/filename
       ;;
     view | v)
-      __note_fzf --bind "enter:become(bat --plain --language=markdown $NOTE_DIR/{1})"
+      __note_fzf --bind "enter:become(bat -l markdown $NOTE_DIR/{1})"
       ;;
     grep | rg)
       rg -inH "$@" $NOTE_DIR/
