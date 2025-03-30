@@ -16,7 +16,8 @@ note() {
     return 1
   fi
   subcommand="$1"
-  case "$1" in
+	shift
+  case $subcommand in
     list | ls)
       fd --follow --base-directory "$NOTE_DIR" --exclude ".git" --type f . |
         tree -C --fromfile
@@ -49,7 +50,7 @@ note() {
       __note_fzf --print0 -m | xargs -I filename -0 -o rm -i $NOTE_DIR/filename
       ;;
     view | v)
-      __note_fzf --bind "enter:become(bat -l markdown $NOTE_DIR/{1})"
+      __note_fzf --bind "enter:become(bat -l --style=header-filename markdown $NOTE_DIR/{1})"
       ;;
     preview | p)
       local filename=$(__note_fzf)
