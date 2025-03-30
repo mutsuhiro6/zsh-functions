@@ -19,6 +19,10 @@ pg_ctl() {
   docker exec -it -u postgres postgres pg_ctl "${argv[@]}"
 }
 
+pgbench() {
+  docker exec -it -u postgres postgres pgbench "${argv[@]}"
+}
+
 pg_top() {
   docker exec -it -u postgres postgres pg_top "${argv[@]}"
 }
